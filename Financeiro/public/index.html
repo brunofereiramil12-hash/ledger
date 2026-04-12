@@ -18,10 +18,6 @@
       padding-bottom: 80px;
     }
 
-    h2 {
-      margin-top: 0;
-    }
-
     input, button {
       width: 100%;
       padding: 12px;
@@ -42,15 +38,20 @@
       padding: 15px;
       margin-bottom: 10px;
       border-radius: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
-    .tab {
-      display: none;
+    .delete {
+      background: red;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 12px;
     }
 
-    .active {
-      display: block;
-    }
+    .tab { display: none; }
+    .active { display: block; }
 
     .bottom-menu {
       position: fixed;
@@ -65,120 +66,144 @@
     .bottom-menu button {
       background: none;
       color: white;
-      font-size: 14px;
     }
   </style>
 </head>
 
 <body>
 
-  <div class="container">
+<div class="container">
 
-    <!-- HOME -->
-    <div id="home" class="tab active">
-      <h2>Controle Financeiro</h2>
+  <div id="home" class="tab active">
+    <h2>Gastos</h2>
 
-      <input type="text" id="descricao" placeholder="Descrição">
-      <input type="number" id="valor" placeholder="Valor">
+    <input type="text" id="descricao" placeholder="Descrição">
+    <input type="number" id="valor" placeholder="Valor">
 
-      <button onclick="addGasto()">Adicionar</button>
+    <button onclick="addGasto()">Adicionar</button>
 
-      <div id="lista"></div>
-    </div>
-
-    <!-- METAS -->
-    <div id="metas" class="tab">
-      <h2>Metas</h2>
-
-      <input type="text" id="metaNome" placeholder="Nome da meta">
-      <input type="number" id="metaValor" placeholder="Valor">
-
-      <button onclick="addMeta()">Adicionar Meta</button>
-
-      <div id="listaMetas"></div>
-    </div>
-
-    <!-- IA -->
-    <div id="ia" class="tab">
-      <h2>Dicas da IA</h2>
-
-      <div id="dicasIA">
-        <p>Clique no botão para gerar dicas</p>
-      </div>
-
-      <button onclick="gerarDicas()">Gerar dicas</button>
-    </div>
-
+    <div id="lista"></div>
   </div>
 
-  <!-- MENU -->
-  <div class="bottom-menu">
-    <button onclick="showTab('home')">Home</button>
-    <button onclick="showTab('metas')">Metas</button>
-    <button onclick="showTab('ia')">IA</button>
+  <div id="metas" class="tab">
+    <h2>Metas</h2>
+
+    <input type="text" id="metaNome" placeholder="Nome">
+    <input type="number" id="metaValor" placeholder="Valor">
+
+    <button onclick="addMeta()">Adicionar</button>
+
+    <div id="listaMetas"></div>
   </div>
 
-  <script>
-    let gastos = [];
-    let metas = [];
+  <div id="ia" class="tab">
+    <h2>Dicas IA</h2>
 
-    function showTab(tab) {
-      document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
-      document.getElementById(tab).classList.add('active');
-    }
+    <div id="dicasIA"></div>
 
-    function addGasto() {
-      const desc = document.getElementById('descricao').value;
-      const val = document.getElementById('valor').value;
+    <button onclick="gerarDicas()">Gerar</button>
+  </div>
 
-      if (!desc || !val) return;
+</div>
 
-      gastos.push({ desc, val });
-      renderGastos();
-    }
+<div class="bottom-menu">
+  <button onclick="showTab('home')">Home</button>
+  <button onclick="showTab('metas')">Metas</button>
+  <button onclick="showTab('ia')">IA</button>
+</div>
 
-    function renderGastos() {
-      let html = '';
-      gastos.forEach(g => {
-        html += `<div class="card">${g.desc} - R$ ${g.val}</div>`;
-      });
-      document.getElementById('lista').innerHTML = html;
-    }
+<script>
+  let gastos = JSON.parse(localStorage.getItem('gastos')) || [];
+  let metas = JSON.parse(localStorage.getItem('metas')) || [];
 
-    function addMeta() {
-      const nome = document.getElementById('metaNome').value;
-      const valor = document.getElementById('metaValor').value;
+  function saveData() {
+    localStorage.setItem('gastos', JSON.stringify(gastos));
+    localStorage.setItem('metas', JSON.stringify(metas));
+  }
 
-      if (!nome || !valor) return;
+  function showTab(tab) {
+    document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+    document.getElementById(tab).classList.add('active');
+  }
 
-      metas.push({ nome, valor });
-      renderMetas();
-    }
+  function addGasto() {
+    const desc = document.getElementById('descricao').value;
+    const val = document.getElementById('valor').value;
 
-    function renderMetas() {
-      let html = '';
-      metas.forEach(m => {
-        html += `<div class="card">${m.nome} - R$ ${m.valor}</div>`;
-      });
-      document.getElementById('listaMetas').innerHTML = html;
-    }
+    if (!desc || !val) return;
 
-    function gerarDicas() {
-      const dicas = [
-        "Evite gastos desnecessários",
-        "Guarde 10% do seu dinheiro",
-        "Revise seus gastos semanalmente",
-        "Crie metas financeiras claras"
-      ];
+    gastos.push({ desc, val });
+    saveData();
+    renderGastos();
+  }
 
-      let html = '';
-      dicas.forEach(d => {
-        html += `<div class="card">${d}</div>`;
-      });
+  function deleteGasto(index) {
+    gastos.splice(index, 1);
+    saveData();
+    renderGastos();
+  }
 
-      document.getElementById('dicasIA').innerHTML = html;
-    }
-  </script>
+  function renderGastos() {
+    let html = '';
+    gastos.forEach((g, i) => {
+      html += `
+        <div class="card">
+          ${g.desc} - R$ ${g.val}
+          <button class="delete" onclick="deleteGasto(${i})">X</button>
+        </div>`;
+    });
+    document.getElementById('lista').innerHTML = html;
+  }
+
+  function addMeta() {
+    const nome = document.getElementById('metaNome').value;
+    const valor = document.getElementById('metaValor').value;
+
+    if (!nome || !valor) return;
+
+    metas.push({ nome, valor });
+    saveData();
+    renderMetas();
+  }
+
+  function deleteMeta(index) {
+    metas.splice(index, 1);
+    saveData();
+    renderMetas();
+  }
+
+  function renderMetas() {
+    let html = '';
+    metas.forEach((m, i) => {
+      html += `
+        <div class="card">
+          ${m.nome} - R$ ${m.valor}
+          <button class="delete" onclick="deleteMeta(${i})">X</button>
+        </div>`;
+    });
+    document.getElementById('listaMetas').innerHTML = html;
+  }
+
+  function gerarDicas() {
+    const dicas = [
+      "Você está gastando muito, tente reduzir despesas",
+      "Guarde pelo menos 10% da sua renda",
+      "Revise seus gastos toda semana",
+      "Evite compras impulsivas"
+    ];
+
+    let html = '';
+    dicas.forEach(d => {
+      html += `<div class="card">${d}</div>`;
+    });
+
+    document.getElementById('dicasIA').innerHTML = html;
+  }
+
+  // carregar dados ao abrir
+  renderGastos();
+  renderMetas();
+</script>
 
 </body>
 </html>
