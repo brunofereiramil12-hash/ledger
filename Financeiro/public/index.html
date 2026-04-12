@@ -1,208 +1,250 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Financeiro App</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Financeiro Nubank Style</title>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0f172a;
-      color: white;
-    }
+<style>
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: #121212;
+    color: white;
+  }
 
-    .container {
-      padding: 15px;
-      padding-bottom: 80px;
-    }
+  .header {
+    background: linear-gradient(135deg, #7b2cbf, #9d4edd);
+    padding: 20px;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+  }
 
-    input, button {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 10px;
-      border-radius: 10px;
-      border: none;
-      font-size: 16px;
-    }
+  .header h1 {
+    margin: 0;
+    font-size: 20px;
+  }
 
-    button {
-      background: #22c55e;
-      color: white;
-      font-weight: bold;
-    }
+  .balance {
+    margin-top: 10px;
+    font-size: 28px;
+    font-weight: bold;
+  }
 
-    .card {
-      background: #1e293b;
-      padding: 15px;
-      margin-bottom: 10px;
-      border-radius: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+  .container {
+    padding: 15px;
+    padding-bottom: 90px;
+  }
 
-    .delete {
-      background: red;
-      padding: 5px 10px;
-      border-radius: 6px;
-      font-size: 12px;
-    }
+  input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    margin-bottom: 10px;
+    background: #1e1e1e;
+    color: white;
+  }
 
-    .tab { display: none; }
-    .active { display: block; }
+  button {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    background: #9d4edd;
+    color: white;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
 
-    .bottom-menu {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      display: flex;
-      justify-content: space-around;
-      background: #020617;
-      padding: 10px 0;
-    }
+  .card {
+    background: #1e1e1e;
+    padding: 15px;
+    border-radius: 16px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 
-    .bottom-menu button {
-      background: none;
-      color: white;
-    }
-  </style>
+  .delete {
+    background: #ff4d6d;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 8px;
+    color: white;
+  }
+
+  .tab { display: none; }
+  .active { display: block; }
+
+  .bottom-menu {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    background: #1a1a1a;
+    padding: 10px 0;
+    border-top: 1px solid #333;
+  }
+
+  .bottom-menu button {
+    background: none;
+    color: #aaa;
+    font-size: 14px;
+  }
+
+  .bottom-menu button.active {
+    color: #9d4edd;
+  }
+
+</style>
 </head>
 
 <body>
 
+<div class="header">
+  <h1>Olá 👋</h1>
+  <div class="balance" id="total">R$ 0</div>
+</div>
+
 <div class="container">
 
   <div id="home" class="tab active">
-    <h2>Gastos</h2>
-
     <input type="text" id="descricao" placeholder="Descrição">
     <input type="number" id="valor" placeholder="Valor">
-
     <button onclick="addGasto()">Adicionar</button>
-
     <div id="lista"></div>
   </div>
 
   <div id="metas" class="tab">
-    <h2>Metas</h2>
-
-    <input type="text" id="metaNome" placeholder="Nome">
+    <input type="text" id="metaNome" placeholder="Meta">
     <input type="number" id="metaValor" placeholder="Valor">
-
     <button onclick="addMeta()">Adicionar</button>
-
     <div id="listaMetas"></div>
   </div>
 
   <div id="ia" class="tab">
-    <h2>Dicas IA</h2>
-
+    <button onclick="gerarDicas()">Gerar dicas</button>
     <div id="dicasIA"></div>
-
-    <button onclick="gerarDicas()">Gerar</button>
   </div>
 
 </div>
 
 <div class="bottom-menu">
-  <button onclick="showTab('home')">Home</button>
-  <button onclick="showTab('metas')">Metas</button>
-  <button onclick="showTab('ia')">IA</button>
+  <button onclick="setTab('home', this)" class="active">Home</button>
+  <button onclick="setTab('metas', this)">Metas</button>
+  <button onclick="setTab('ia', this)">IA</button>
 </div>
 
 <script>
-  let gastos = JSON.parse(localStorage.getItem('gastos')) || [];
-  let metas = JSON.parse(localStorage.getItem('metas')) || [];
+let gastos = JSON.parse(localStorage.getItem('gastos')) || [];
+let metas = JSON.parse(localStorage.getItem('metas')) || [];
 
-  function saveData() {
-    localStorage.setItem('gastos', JSON.stringify(gastos));
-    localStorage.setItem('metas', JSON.stringify(metas));
-  }
+function save() {
+  localStorage.setItem('gastos', JSON.stringify(gastos));
+  localStorage.setItem('metas', JSON.stringify(metas));
+}
 
-  function showTab(tab) {
-    document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
-    document.getElementById(tab).classList.add('active');
-  }
+function setTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(tab).classList.add('active');
 
-  function addGasto() {
-    const desc = document.getElementById('descricao').value;
-    const val = document.getElementById('valor').value;
+  document.querySelectorAll('.bottom-menu button').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
 
-    if (!desc || !val) return;
+function addGasto() {
+  const desc = descricao.value;
+  const val = parseFloat(valor.value);
 
-    gastos.push({ desc, val });
-    saveData();
-    renderGastos();
-  }
+  if (!desc || !val) return;
 
-  function deleteGasto(index) {
-    gastos.splice(index, 1);
-    saveData();
-    renderGastos();
-  }
+  gastos.push({ desc, val });
+  save();
+  render();
+}
 
-  function renderGastos() {
-    let html = '';
-    gastos.forEach((g, i) => {
-      html += `
-        <div class="card">
-          ${g.desc} - R$ ${g.val}
-          <button class="delete" onclick="deleteGasto(${i})">X</button>
-        </div>`;
-    });
-    document.getElementById('lista').innerHTML = html;
-  }
+function deleteGasto(i) {
+  gastos.splice(i, 1);
+  save();
+  render();
+}
 
-  function addMeta() {
-    const nome = document.getElementById('metaNome').value;
-    const valor = document.getElementById('metaValor').value;
+function render() {
+  let total = 0;
+  let html = '';
 
-    if (!nome || !valor) return;
+  gastos.forEach((g, i) => {
+    total += g.val;
+    html += `
+      <div class="card">
+        ${g.desc} - R$ ${g.val}
+        <button class="delete" onclick="deleteGasto(${i})">X</button>
+      </div>`;
+  });
 
-    metas.push({ nome, valor });
-    saveData();
-    renderMetas();
-  }
+  lista.innerHTML = html;
+  totalEl = document.getElementById('total');
+  totalEl.innerText = 'R$ ' + total;
+}
 
-  function deleteMeta(index) {
-    metas.splice(index, 1);
-    saveData();
-    renderMetas();
-  }
+function addMeta() {
+  const nome = metaNome.value;
+  const valor = metaValor.value;
 
-  function renderMetas() {
-    let html = '';
-    metas.forEach((m, i) => {
-      html += `
-        <div class="card">
-          ${m.nome} - R$ ${m.valor}
-          <button class="delete" onclick="deleteMeta(${i})">X</button>
-        </div>`;
-    });
-    document.getElementById('listaMetas').innerHTML = html;
-  }
+  if (!nome || !valor) return;
 
-  function gerarDicas() {
-    const dicas = [
-      "Você está gastando muito, tente reduzir despesas",
-      "Guarde pelo menos 10% da sua renda",
-      "Revise seus gastos toda semana",
-      "Evite compras impulsivas"
-    ];
-
-    let html = '';
-    dicas.forEach(d => {
-      html += `<div class="card">${d}</div>`;
-    });
-
-    document.getElementById('dicasIA').innerHTML = html;
-  }
-
-  // carregar dados ao abrir
-  renderGastos();
+  metas.push({ nome, valor });
+  save();
   renderMetas();
+}
+
+function deleteMeta(i) {
+  metas.splice(i, 1);
+  save();
+  renderMetas();
+}
+
+function renderMetas() {
+  let html = '';
+
+  metas.forEach((m, i) => {
+    html += `
+      <div class="card">
+        ${m.nome} - R$ ${m.valor}
+        <button class="delete" onclick="deleteMeta(${i})">X</button>
+      </div>`;
+  });
+
+  listaMetas.innerHTML = html;
+}
+
+function gerarDicas() {
+  let total = gastos.reduce((s, g) => s + g.val, 0);
+
+  let dicas = [];
+
+  if (total > 1000) {
+    dicas.push('Você gastou muito! Tente economizar mais.');
+  } else {
+    dicas.push('Seus gastos estão sob controle 👍');
+  }
+
+  dicas.push('Guarde pelo menos 10% da sua renda');
+  dicas.push('Revise seus gastos semanalmente');
+
+  let html = '';
+  dicas.forEach(d => {
+    html += `<div class="card">${d}</div>`;
+  });
+
+  dicasIA.innerHTML = html;
+}
+
+render();
+renderMetas();
 </script>
 
 </body>
